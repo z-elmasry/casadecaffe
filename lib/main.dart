@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,21 +21,33 @@ class WebViewScreen extends StatefulWidget {
 }
 
 class _WebViewScreenState extends State<WebViewScreen> {
-  late final WebViewController _controller;
+  late InAppWebViewController webViewController;
+  late PullToRefreshController pullToRefreshController;
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse("https://casadecaffee.com/Default.aspx"));
+
+    pullToRefreshController = PullToRefreshController(
+      onRefresh: () async {
+        await webViewController.reload();
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: WebViewWidget(controller: _controller),
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: WebUri("https://casadecaffee.com/Default.aspx"),
+          ),
+          pullToRefreshController: pullToRefreshController,
+           onWebViewCreated: (controller) {
+            webViewController = controller;
+          },
+        ),
       ),
     );
   }
